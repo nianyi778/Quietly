@@ -38,4 +38,21 @@ final class QuietlyUITests: XCTestCase {
             XCUIApplication().launch()
         }
     }
+
+    @MainActor
+    func testTriggerPermissions() throws {
+        // 目的：触发 macOS 的 Automation / Accessibility 权限弹窗
+        // 方法：尝试通过 XCUITest 控制 Finder。这通常会触发 "QuietlyUITests-Runner wants to control Finder" 的系统弹窗。
+        
+        let finder = XCUIApplication(bundleIdentifier: "com.apple.finder")
+        // 尝试启动或连接 Finder
+        finder.activate()
+        
+        // 尝试读取 Finder 的窗口列表（这一步通常是权限触发点）
+        // 注意：如果权限被拒绝，这里可能会失败或返回空，但我们的目的是“触发弹窗”
+        let _ = finder.windows.count
+        
+        // 简单的断言，确保代码执行到了这里
+        XCTAssertTrue(true)
+    }
 }

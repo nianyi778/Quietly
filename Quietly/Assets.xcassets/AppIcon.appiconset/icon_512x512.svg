@@ -1,0 +1,52 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- App Icon: Quiet Orbit 设计 -->
+  <!-- 背景：深蓝渐变（代表安静的夜空） -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+    <linearGradient id="orbitGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e2e2e2"/>
+      <stop offset="100%" style="stop-color:#a0a0a0"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- 圆角背景 -->
+  <rect width="512" height="512" rx="115" fill="url(#bgGradient)"/>
+  
+  <!-- 外圈轨道（自动化循环） -->
+  <circle 
+    cx="256" cy="256" r="160" 
+    stroke="url(#orbitGradient)" 
+    stroke-width="12" 
+    fill="none"
+    opacity="0.9"
+  />
+  
+  <!-- 月牙效果：用深色圆遮挡 -->
+  <circle 
+    cx="340" cy="180" r="100" 
+    fill="url(#bgGradient)"
+  />
+  
+  <!-- 状态节点 1（右下，较大） -->
+  <circle 
+    cx="380" cy="340" r="28" 
+    fill="#e2e2e2"
+  />
+  
+  <!-- 状态节点 2（左侧，较小） -->
+  <circle 
+    cx="110" cy="256" r="18" 
+    fill="#e2e2e2"
+    opacity="0.8"
+  />
+  
+  <!-- 中心微光点（智能感知） -->
+  <circle 
+    cx="256" cy="256" r="8" 
+    fill="#e2e2e2"
+    opacity="0.5"
+  />
+</svg>

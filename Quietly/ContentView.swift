@@ -9,13 +9,9 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-        }
-        .padding()
+        let store = UserDefaultsRuleStore(defaults: UserDefaults(suiteName: "content-preview")!)
+        let model = AppModel(ruleStore: store)
+        return MenuPopoverView(model: model)
     }
 }
 

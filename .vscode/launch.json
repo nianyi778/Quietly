@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug Quietly",
+            "program": "${workspaceFolder}/build/Build/Products/Debug/Quietly.app/Contents/MacOS/Quietly",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "Build Quietly"
+        }
+    ]
+}

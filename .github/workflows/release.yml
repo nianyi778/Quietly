@@ -1,0 +1,116 @@
+name: Release Build + Tag
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build Release
+    runs-on: macos-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Read version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          SETTINGS=$(xcodebuild -project Quietly.xcodeproj -scheme Quietly -configuration Release -showBuildSettings)
+
+          VERSION=$(echo "$SETTINGS" | awk -F ' = ' '/\bMARKETING_VERSION\b/ { print $2; exit }' | tr -d '[:space:]')
+          if [ -z "$VERSION" ]; then
+            echo "MARKETING_VERSION not found" >&2
+            exit 1
+          fi
+
+          TAG="v${VERSION}"
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Build (Release, no codesign)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          xcodebuild \
+            -project Quietly.xcodeproj \
+            -scheme Quietly \
+            -configuration Release \
+            -derivedDataPath ./build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            build
+
+      - name: Package app
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          APP_PATH="./build/Build/Products/Release/Quietly.app"
+          if [ ! -d "$APP_PATH" ]; then
+            echo "Release app not found at $APP_PATH" >&2
+            exit 1
+          fi
+
+          mkdir -p dist
+          OUT="dist/Quietly-${{ steps.version.outputs.tag }}.zip"
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$OUT"
+          ls -lh "$OUT"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Quietly-${{ steps.version.outputs.tag }}
+          path: dist/*.zip
+
+  tag:
+    name: Tag version (if missing)
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create and push tag if not exists
+        shell: bash
+        env:
+          TAG: ${{ needs.build.outputs.tag }}
+        run: |
+          set -euo pipefail
+
+          git fetch --tags --force
+
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "Tag $TAG already exists. Skipping."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git tag "$TAG" "$GITHUB_SHA"
+          git push origin "$TAG"

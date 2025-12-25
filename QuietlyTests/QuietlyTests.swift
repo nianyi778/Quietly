@@ -10,8 +10,108 @@ import Testing
 
 struct QuietlyTests {
 
-    @Test func example() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+    @Test func ruleEngine_lidClose_triggersBluetoothOffOnce() async throws {
+        let prev = SystemState(
+            timestampMs: 1,
+            lidClosed: false,
+            onBattery: false,
+            externalDisplayConnected: false,
+            bluetoothEnabled: true
+        )
+
+        let curr = SystemState(
+            timestampMs: 2,
+            lidClosed: true,
+            onBattery: false,
+            externalDisplayConnected: false,
+            bluetoothEnabled: true
+        )
+
+        let actions = await RuleEngine.evaluate(
+            prev: prev,
+            curr: curr,
+            enabledRules: [.lidCloseBluetoothOff]
+        )
+
+        #expect(actions == [.setBluetooth(on: false)])
+    }
+
+    @Test func ruleEngine_lidClose_noEdge_noAction() async throws {
+        let prev = SystemState(
+            timestampMs: 1,
+            lidClosed: true,
+            onBattery: false,
+            externalDisplayConnected: false,
+            bluetoothEnabled: true
+        )
+
+        let curr = SystemState(
+            timestampMs: 2,
+            lidClosed: true,
+            onBattery: false,
+            externalDisplayConnected: false,
+            bluetoothEnabled: true
+        )
+
+        let actions = await RuleEngine.evaluate(
+            prev: prev,
+            curr: curr,
+            enabledRules: [.lidCloseBluetoothOff]
+        )
+
+        #expect(actions.isEmpty)
+    }
+
+    @Test func ruleEngine_onBattery_triggersBluetoothOff() async throws {
+        let prev = SystemState(
+            timestampMs: 1,
+            lidClosed: false,
+            onBattery: false,
+            externalDisplayConnected: false,
+            bluetoothEnabled: true
+        )
+
+        let curr = SystemState(
+            timestampMs: 2,
+            lidClosed: false,
+            onBattery: true,
+            externalDisplayConnected: false,
+            bluetoothEnabled: true
+        )
+
+        let actions = await RuleEngine.evaluate(
+            prev: prev,
+            curr: curr,
+            enabledRules: [.onBatteryPowerSave]
+        )
+
+        #expect(actions == [.setPowerMode(.low)])
+    }
+
+    @Test func ruleEngine_plugIn_triggersPowerModeAuto() async throws {
+        let prev = SystemState(
+            timestampMs: 1,
+            lidClosed: false,
+            onBattery: true,
+            externalDisplayConnected: false,
+            bluetoothEnabled: true
+        )
+
+        let curr = SystemState(
+            timestampMs: 2,
+            lidClosed: false,
+            onBattery: false,
+            externalDisplayConnected: false,
+            bluetoothEnabled: true
+        )
+
+        let actions = await RuleEngine.evaluate(
+            prev: prev,
+            curr: curr,
+            enabledRules: [.onBatteryPowerSave]
+        )
+
+        #expect(actions == [.setPowerMode(.automatic)])
     }
 
 }

@@ -1,0 +1,19 @@
+<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Quiet Orbit: 月亮弧线 + 轨道 + 状态节点 -->
+  
+  <!-- 外圈轨道（自动化循环） -->
+  <ellipse
+    cx="9" cy="9" rx="7" ry="5.46"
+    stroke="black"
+    stroke-width="1.2"
+    fill="none"
+    stroke-dasharray="0"
+    transform="rotate(-20 9 9)"
+  />
+  
+  <!-- 月牙缺口（安静） - 用白色圆遮挡形成月牙效果 -->
+  <circle 
+    cx="12.5" cy="6" r="4.5" 
+    fill="white"
+  />
+</svg>
