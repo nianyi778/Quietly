@@ -36,11 +36,12 @@ jobs:
         run: |
           set -euo pipefail
 
-          SETTINGS=$(xcodebuild -project Quietly.xcodeproj -scheme Quietly -configuration Release -showBuildSettings)
+          SETTINGS=$(xcodebuild -project Quietly.xcodeproj -scheme Quietly -configuration Release -destination 'platform=macOS,arch=arm64' -showBuildSettings)
 
-          VERSION=$(echo "$SETTINGS" | awk -F ' = ' '/\bMARKETING_VERSION\b/ { print $2; exit }' | tr -d '[:space:]')
+          VERSION=$(echo "$SETTINGS" | awk -F ' = ' '$1=="MARKETING_VERSION" { print $2; exit }' | tr -d '[:space:]')
           if [ -z "$VERSION" ]; then
-            echo "MARKETING_VERSION not found" >&2
+            echo "MARKETING_VERSION not found. Available version-related settings:" >&2
+            echo "$SETTINGS" | grep -E '^(MARKETING_VERSION|CURRENT_PROJECT_VERSION) = ' || true
             exit 1
           fi
 
@@ -58,6 +59,7 @@ jobs:
             -project Quietly.xcodeproj \
             -scheme Quietly \
             -configuration Release \
+            -destination 'platform=macOS,arch=arm64' \
             -derivedDataPath ./build \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
