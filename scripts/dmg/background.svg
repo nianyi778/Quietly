@@ -1,0 +1,36 @@
+<svg width="540" height="380" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f8f9fa"/>
+      <stop offset="100%" style="stop-color:#e9ecef"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="540" height="380" fill="url(#bg)"/>
+  
+  <!-- Arrow - centered between icons at y≈180 (icon center) -->
+  <g transform="translate(270, 120)">
+    <!-- Arrow body -->
+    <path d="M -40 0 L 30 0 L 30 -12 L 55 8 L 30 28 L 30 16 L -40 16 Z" 
+          fill="#adb5bd" opacity="0.8"/>
+  </g>
+  
+  <!-- Drag hint text -->
+  <text x="270" y="280" 
+        font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif" 
+        font-size="13" 
+        fill="#6c757d" 
+        text-anchor="middle">
+    拖拽到 Applications 完成安装
+  </text>
+  
+  <!-- English hint -->
+  <text x="270" y="300" 
+        font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif" 
+        font-size="11" 
+        fill="#adb5bd" 
+        text-anchor="middle">
+    Drag to Applications to install
+  </text>
+</svg>
