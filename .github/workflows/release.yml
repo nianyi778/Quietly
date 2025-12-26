@@ -201,7 +201,7 @@ jobs:
               -o "$DMG_OUT" >/dev/null
 
             rm -f "$RW_DMG"
-            rm -rf "$MOUNT_DIR"
+            rm -rf dmgroot
           }
 
           set +e
