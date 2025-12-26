@@ -81,16 +81,46 @@ jobs:
           ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$OUT"
           ls -lh "$OUT"
 
+      - name: Create DMG
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          APP_PATH="./build/Build/Products/Release/Quietly.app"
+          if [ ! -d "$APP_PATH" ]; then
+            echo "Release app not found at $APP_PATH" >&2
+            exit 1
+          fi
+
+          TAG="${{ steps.version.outputs.tag }}"
+          DMG_OUT="dist/Quietly-${TAG}.dmg"
+
+          rm -rf dmgroot
+          mkdir -p dmgroot
+          cp -R "$APP_PATH" dmgroot/
+          ln -s /Applications dmgroot/Applications
+
+          hdiutil create \
+            -volname "Quietly" \
+            -srcfolder dmgroot \
+            -ov \
+            -format UDZO \
+            "$DMG_OUT"
+
+          ls -lh "$DMG_OUT"
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: Quietly-${{ steps.version.outputs.tag }}
-          path: dist/*.zip
+          path: dist/*
 
   tag:
     name: Tag version (if missing)
     runs-on: ubuntu-latest
     needs: build
+    outputs:
+      tag_created: ${{ steps.tag.outputs.tag_created }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -98,6 +128,7 @@ jobs:
           fetch-depth: 0
 
       - name: Create and push tag if not exists
+        id: tag
         shell: bash
         env:
           TAG: ${{ needs.build.outputs.tag }}
@@ -108,6 +139,7 @@ jobs:
 
           if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
             echo "Tag $TAG already exists. Skipping."
+            echo "tag_created=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -116,3 +148,28 @@ jobs:
 
           git tag "$TAG" "$GITHUB_SHA"
           git push origin "$TAG"
+
+          echo "tag_created=true" >> "$GITHUB_OUTPUT"
+
+  release:
+    name: Create GitHub Release (DMG)
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - tag
+    if: needs.tag.outputs.tag_created == 'true'
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Quietly-${{ needs.build.outputs.tag }}
+          path: dist
+
+      - name: Create GitHub Release and upload DMG
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.build.outputs.tag }}
+          name: ${{ needs.build.outputs.tag }}
+          files: dist/*.dmg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
